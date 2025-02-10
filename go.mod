@@ -1,15 +1,14 @@
-module simple-file-server
+module github.com/biggi93/simple-file-server
 
 go 1.23.4
 
-require github.com/go-chi/chi/v5 v5.2.0
+require github.com/stretchr/testify v1.10.0 // indirect
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/go-chi/chi v1.5.5
 	github.com/hetznercloud/hcloud-go v1.59.2
-	github.com/hetznercloud/hcloud-go/v2 v2.19.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/prometheus/client_golang v1.20.5 // indirect
