@@ -1,0 +1,7 @@
+services:
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - /opt/certbot:/opt/cb
+      - /opt/certbot/static:/etc/letsencrypt/:rw
+    command: certonly -n --webroot -w /opt/cb -d ${DOMAIN} --agree-tos --email ${EMAIL}
