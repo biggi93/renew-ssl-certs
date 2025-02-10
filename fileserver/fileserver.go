@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"simple-file-server/config"
+	"github.com/biggi93/simple-file-server/config"
 	"strings"
 
 	"github.com/go-chi/chi"

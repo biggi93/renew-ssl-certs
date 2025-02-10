@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"simple-file-server/config"
+	"github.com/biggi93/simple-file-server/config"
 	"time"
 
 	"github.com/hetznercloud/hcloud-go/hcloud"

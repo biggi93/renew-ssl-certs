@@ -2,10 +2,10 @@ package main
 
 import (
 	"log"
-	"simple-file-server/certbot"
-	"simple-file-server/config"
-	"simple-file-server/fileserver"
-	"simple-file-server/hetzner"
+	"github.com/biggi93/simple-file-server/certbot"
+	"github.com/biggi93/simple-file-server/config"
+	"github.com/biggi93/simple-file-server/fileserver"
+	"github.com/biggi93/simple-file-server/hetzner"
 )
 
 func main() {
