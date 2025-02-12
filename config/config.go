@@ -22,6 +22,8 @@ type HetznerConfig struct {
 }
 
 
+
+
 func Get() *Config {
 	return config
 }
