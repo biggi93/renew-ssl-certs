@@ -84,6 +84,7 @@ func (h *hetznerData) AddTcpPortServiceForSSL() error {
 }
 
 func (h *hetznerData) WaitForTcp80LBService() error {
+	time.Sleep(15 * time.Second)
 	for {
 		log.Println("Starting Waiting Setting Up Loadbalancer Service")
 		lb, _, err := h.HetznerClient.LoadBalancer.GetByID(context.Background(), h.LoadBalancer.ID)
