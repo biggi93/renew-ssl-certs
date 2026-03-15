@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"time"
 
 	"github.com/biggi93/simple-file-server/certbot"
 	"github.com/biggi93/simple-file-server/config"
@@ -33,7 +32,6 @@ func main() {
 	// h.WaitForTcp80LBService()
 
 	h.TestLbService() 
-	time.Sleep(time.Hour * 1)
 
 	certbot.Run()
 
