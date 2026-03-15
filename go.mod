@@ -1,22 +1,25 @@
 module github.com/biggi93/simple-file-server
 
-go 1.23.4
+go 1.26.1
 
-require github.com/stretchr/testify v1.10.0 // indirect
+require (
+	github.com/stretchr/testify v1.11.1 // indirect
+	go.yaml.in/yaml/v2 v2.4.3 // indirect
+)
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/go-chi/chi v1.5.5
 	github.com/hetznercloud/hcloud-go v1.59.2
-	github.com/klauspost/compress v1.17.9 // indirect
+	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/prometheus/client_golang v1.20.5 // indirect
-	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.55.0 // indirect
-	github.com/prometheus/procfs v0.15.1 // indirect
-	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
-	google.golang.org/protobuf v1.34.2 // indirect
+	github.com/prometheus/client_golang v1.23.2 // indirect
+	github.com/prometheus/client_model v0.6.2 // indirect
+	github.com/prometheus/common v0.67.5 // indirect
+	github.com/prometheus/procfs v0.20.1 // indirect
+	golang.org/x/net v0.52.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
+	google.golang.org/protobuf v1.36.11 // indirect
 )

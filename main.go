@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+
 	"github.com/biggi93/simple-file-server/certbot"
 	"github.com/biggi93/simple-file-server/config"
 	"github.com/biggi93/simple-file-server/fileserver"
@@ -18,14 +19,22 @@ func main() {
 
 	h := hetzner.GetHetznerObject()
 
-	h.AddTcpPortServiceForSSL()
+	err := h.OpenAddFWRule()
 
-	h.WaitForTcp80LBService()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer h.CloseAddFWRule()
 
-	h.TestLbService()
+
+	// h.AddTcpPortServiceForSSL()
+
+	// h.WaitForTcp80LBService()
+
+	h.TestLbService() 
 
 	certbot.Run()
 
-	h.DeleteTcpPort80ServiceForSSL()
+	// h.DeleteTcpPort80ServiceForSSL()
 
 }

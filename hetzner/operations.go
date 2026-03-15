@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
-	"github.com/biggi93/simple-file-server/config"
 	"time"
+
+	"github.com/biggi93/simple-file-server/config"
 
 	"github.com/hetznercloud/hcloud-go/hcloud"
 )
@@ -14,10 +16,19 @@ import (
 type hetznerData struct {
 	HetznerClient         *hcloud.Client
 	LoadBalancerId        int
+	FireWallName			 string
 	LoadBalancer          *hcloud.LoadBalancer
+	FireWall					 *hcloud.Firewall
 	TargetServiceIdForSSL int
 	ListenPort            int
 	TargetPort            int
+	PortSSHIn				 string
+	PortBWIn					 string
+	PortBWOut				 string
+	PortCertBotIn			 string
+	PortCertBotOut			 string
+	PortBWMailOut			 string
+	Port443					 string
 	Domain                string
 }
 
@@ -29,13 +40,34 @@ func GetHetznerObject() *hetznerData {
 		LoadBalancerId: config.Hetzner.LoadbalanceID,
 		ListenPort:     config.Hetzner.LoadBalancerListenerPort,
 		TargetPort:     config.Hetzner.LoadBalancerTargetPort,
+		PortSSHIn: 		 config.Hetzner.PortSshIn,
+		PortBWIn: 		 config.Hetzner.PortBWIn,
+		PortBWOut: 		 config.Hetzner.PortBWOut,
+		PortBWMailOut:	 config.Hetzner.PortBwMailOut,
+		PortCertBotIn:  config.Hetzner.PortCbIn,
+		PortCertBotOut:  config.Hetzner.PortCbOut,
+		Port443: config.Hetzner.Port443,
+		FireWallName: 	 config.Hetzner.FireWallName,
 		HetznerClient:  client,
 		Domain:         config.Domain,
 	}
 
 	h.setLoadBalancer()
+	h.setFireWall()
 	return h
 }
+
+func (h *hetznerData) setFireWall() {
+
+	fw,_,  err := h.HetznerClient.Firewall.GetByName(context.Background(), h.FireWallName)
+
+	if err != nil {
+		panic(err)
+	}
+
+	h.FireWall = fw
+}
+
 
 func (h *hetznerData) setLoadBalancer() {
 	lb, _, err := h.HetznerClient.LoadBalancer.GetByID(context.Background(), h.LoadBalancerId)
@@ -109,7 +141,7 @@ func (h *hetznerData) WaitForTcp80LBService() error {
 
 func (h *hetznerData) TestLbService() {
 	for {
-
+		println("testing lb")
 		response, err := http.Get(fmt.Sprintf("http://%s:%d/test", h.Domain, h.ListenPort))
 		if err != nil {
 			continue
@@ -144,4 +176,193 @@ func (h *hetznerData) DeleteTcpPort80ServiceForSSL() error {
 
 func Ptr[T any](value T) *T {
 	return &value
+}
+
+
+
+func(h *hetznerData) OpenAddFWRule() error {
+	if h.FireWall == nil {
+		return fmt.Errorf("no firewall object available")
+	}
+
+	rules := hcloud.FirewallSetRulesOpts{
+		Rules: []hcloud.FirewallRule{
+				{
+					Direction: hcloud.FirewallRuleDirectionIn,
+					Protocol: hcloud.FirewallRuleProtocolTCP,
+					Port: Ptr(h.PortSSHIn),
+					SourceIPs: []net.IPNet{
+						{
+							IP:   net.ParseIP("0.0.0.0"),
+							Mask: net.CIDRMask(0, 32),
+						},
+            	},
+					Description: Ptr("ssh"),
+				},
+				{
+					Direction: hcloud.FirewallRuleDirectionIn,
+					Protocol: hcloud.FirewallRuleProtocolTCP,
+					Port: Ptr(h.PortCertBotIn),
+					SourceIPs: []net.IPNet{
+						{
+							IP:   net.ParseIP("0.0.0.0"),
+							Mask: net.CIDRMask(0, 32),
+						},
+            	},
+					Description: Ptr("certbot"),
+				},
+				{
+					Direction: hcloud.FirewallRuleDirectionIn,
+					Protocol: hcloud.FirewallRuleProtocolTCP,
+					Port: Ptr(h.PortBWIn),
+					SourceIPs: []net.IPNet{
+						{
+							IP:   net.ParseIP("0.0.0.0"),
+							Mask: net.CIDRMask(0, 32),
+						},
+            	},
+					Description: Ptr("bitwarden"),
+
+				},
+				{
+					Direction: hcloud.FirewallRuleDirectionOut,
+					Protocol: hcloud.FirewallRuleProtocolTCP,
+					Port: Ptr(h.PortCertBotOut),
+					DestinationIPs: []net.IPNet{
+						{
+							IP:   net.ParseIP("0.0.0.0"),
+							Mask: net.CIDRMask(0, 32),
+						},
+            	},
+					Description: Ptr("certbot"),
+				},
+				{
+					Direction: hcloud.FirewallRuleDirectionOut,
+					Protocol: hcloud.FirewallRuleProtocolTCP,
+					Port: Ptr(h.PortBWOut),
+					DestinationIPs: []net.IPNet{
+						{
+							IP:   net.ParseIP("0.0.0.0"),
+							Mask: net.CIDRMask(0, 32),
+						},
+            	},
+					Description: Ptr("bitwarden"),
+
+				},
+				{
+					Direction: hcloud.FirewallRuleDirectionOut,
+					Protocol: hcloud.FirewallRuleProtocolTCP,
+					Port: Ptr(h.PortBWMailOut),
+					DestinationIPs: []net.IPNet{
+						{
+							IP:   net.ParseIP("0.0.0.0"),
+							Mask: net.CIDRMask(0, 32),
+						},
+            	},
+					Description: Ptr("bw_mail"),
+				},
+				{
+					Direction: hcloud.FirewallRuleDirectionOut,
+					Protocol: hcloud.FirewallRuleProtocolTCP,
+					Port: Ptr(h.Port443),
+					DestinationIPs: []net.IPNet{
+						{
+							IP:   net.ParseIP("0.0.0.0"),
+							Mask: net.CIDRMask(0, 32),
+						},
+            	},
+					Description: Ptr("bw_update"),
+				},
+		},
+	}
+
+	_, _, err := h.HetznerClient.Firewall.SetRules(context.Background(), h.FireWall, rules)
+
+	if err != nil {
+		return  err
+	}
+
+	return  nil
+}
+
+
+func(h *hetznerData) CloseAddFWRule() error {
+	if h.FireWall == nil {
+		return fmt.Errorf("no firewall object available")
+	}
+
+	rules := hcloud.FirewallSetRulesOpts{
+		Rules: []hcloud.FirewallRule{
+				{
+					Direction: hcloud.FirewallRuleDirectionIn,
+					Protocol: hcloud.FirewallRuleProtocolTCP,
+					Port: Ptr(h.PortSSHIn),
+					SourceIPs: []net.IPNet{
+						{
+							IP:   net.ParseIP("0.0.0.0"),
+							Mask: net.CIDRMask(0, 32),
+						},
+            	},
+					Description: Ptr("ssh"),
+				},
+				{
+					Direction: hcloud.FirewallRuleDirectionIn,
+					Protocol: hcloud.FirewallRuleProtocolTCP,
+					Port: Ptr(h.PortBWIn),
+					SourceIPs: []net.IPNet{
+						{
+							IP:   net.ParseIP("0.0.0.0"),
+							Mask: net.CIDRMask(0, 32),
+						},
+            	},
+					Description: Ptr("bitwarden"),
+
+				},
+				{
+					Direction: hcloud.FirewallRuleDirectionOut,
+					Protocol: hcloud.FirewallRuleProtocolTCP,
+					Port: Ptr(h.PortBWOut),
+					DestinationIPs: []net.IPNet{
+						{
+							IP:   net.ParseIP("0.0.0.0"),
+							Mask: net.CIDRMask(0, 32),
+						},
+            	},
+					Description: Ptr("bitwarden"),
+
+				},
+				{
+					Direction: hcloud.FirewallRuleDirectionOut,
+					Protocol: hcloud.FirewallRuleProtocolTCP,
+					Port: Ptr(h.PortBWMailOut),
+					DestinationIPs: []net.IPNet{
+						{
+							IP:   net.ParseIP("0.0.0.0"),
+							Mask: net.CIDRMask(0, 32),
+						},
+            	},
+					Description: Ptr("bw_mail"),
+				},
+				{
+					Direction: hcloud.FirewallRuleDirectionOut,
+					Protocol: hcloud.FirewallRuleProtocolTCP,
+					Port: Ptr(h.Port443),
+					DestinationIPs: []net.IPNet{
+						{
+							IP:   net.ParseIP("0.0.0.0"),
+							Mask: net.CIDRMask(0, 32),
+						},
+            	},
+					Description: Ptr("bw_update"),
+				},
+		},
+	}
+
+	_, _, err := h.HetznerClient.Firewall.SetRules(context.Background(), h.FireWall, rules)
+
+	if err != nil {
+		return  err
+	}
+
+	return  nil
 }
