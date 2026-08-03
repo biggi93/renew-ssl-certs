@@ -7,6 +7,7 @@ import (
 	"github.com/biggi93/simple-file-server/config"
 	"github.com/biggi93/simple-file-server/fileserver"
 	"github.com/biggi93/simple-file-server/hetzner"
+	"github.com/biggi93/simple-file-server/post"
 )
 
 func main() {
@@ -36,5 +37,8 @@ func main() {
 	certbot.Run()
 
 	// h.DeleteTcpPort80ServiceForSSL()
+
+	post.Run()
+	
 
 }
