@@ -1,3 +1,5 @@
+#!/bin/sh
+
 rm -f /opt/bitwarden/bwdata/ssl/pkuepper.de/* &&
 cp /opt/renew-ssl-certs/static/live/pkuepper.de/* /opt/bitwarden/bwdata/ssl/pkuepper.de/ &&
 chown bitwarden:bitwarden /opt/bitwarden/bwdata/ssl/pkuepper.de/* &&
